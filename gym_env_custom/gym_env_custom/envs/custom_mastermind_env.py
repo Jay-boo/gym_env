@@ -201,7 +201,7 @@ class MasterMindEnv(gym.Env):
 
         Returns
         -------
-        observation,reward,cumreward,done,info : Tuple()
+        observation,reward,done,info : Tuple()
         """
         assert self.action_space.contains(action) ,"action not in action_space"
         self.step_count+=1
@@ -216,7 +216,7 @@ class MasterMindEnv(gym.Env):
         observation=self._get_obs()
         info=self._get_info()
 
-        return observation,reward,self.cumreward,done,info
+        return observation,reward,done,info
 
     
 
@@ -335,7 +335,6 @@ class MasterMindEnv(gym.Env):
             
             
             for i in range(1,self.step_count+1):
-                print(i)
                 
                 action=self._action_stock[i-1]# de longueur 10
                 agent=self._agent_state_stock[i]# de longueur 1 + 10 
