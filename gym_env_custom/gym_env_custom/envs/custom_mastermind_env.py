@@ -62,15 +62,24 @@ class MasterMindEnv(gym.Env):
         self._agent_state_stock=[]
         self._action_stock=[]
         
-        self.MAP=["+----------------+"]
+        
         line=""
         for _ in range(0,self.size):
             line+="| "
+
         line+="|"
-        line+=line
-        for _ in range(10):
+        line_p2=line
+        line+="X"+line
+
+        boarder="+" 
+        
+        for _ in range(1,len(line)-1):
+            boarder+="-"
+        boarder+="+"
+        self.MAP=[boarder]
+        for _ in range(self.MAX_STEP):
             self.MAP.append(line)
-        self.MAP.append("+----------------+")
+        self.MAP.append(boarder)
 
         self._action_to_color={
             0:( 238, 163, 220 ),#Pink
@@ -131,7 +140,7 @@ class MasterMindEnv(gym.Env):
         Returns
         -------
         observation, info : Tuple
-            observation contain the agent state. Each digit state between 0 and 3
+            observation contains the agent state. Each digit state between 0 and 3
         """
         #---------------------------
         #Reinitialize attributes
@@ -228,6 +237,10 @@ class MasterMindEnv(gym.Env):
             Open a pygame window if mode="human",return a StringIO() if mode="ansi" ,return np.Array if mode="rgb_array" 
         """
 
+        
+        if mode=="ansi":
+            return self._render_ANSI()
+
         if self.window is None and mode=="human":
             pygame.init()
             pygame.display.init()
@@ -295,7 +308,7 @@ class MasterMindEnv(gym.Env):
             return np.transpose(np.array(pygame.surfarray.pixels3d(canvas)),axes=(1,0,2))
 
 
-    def render_ANSI(self):
+    def _render_ANSI(self):
         
         #Une fois initialiser self.MAP ne changera pas
         #On doit seulement changer les couleurs de chaque espaces
@@ -317,11 +330,12 @@ class MasterMindEnv(gym.Env):
         map=np.asarray(map,"c")
         outfile=StringIO()
         out = [[c.decode("utf8") for c in line] for line in map]
-        
+        assert self.step_count <=self.MAX_STEP ,"MAX_STEP reached can't render the new state"
         if self.step_count>0:
             
             
             for i in range(1,self.step_count+1):
+                print(i)
                 
                 action=self._action_stock[i-1]# de longueur 10
                 agent=self._agent_state_stock[i]# de longueur 1 + 10 
@@ -333,7 +347,7 @@ class MasterMindEnv(gym.Env):
                     
                     if line[index_digit]==" ":
                         
-                        color= self._agent_state_to_color[agent[space_line_counter]] if space_line_counter<=3 else self._action_to_color[action[space_line_counter-4]]
+                        color= self._agent_state_to_color[agent[space_line_counter]] if space_line_counter<=self.size-1 else self._action_to_color[action[space_line_counter-self.size]]
                         space_line_counter+=1
                         rgb=RGB(color[0],color[1],color[2],bg=True)
                         line[index_digit]=f"{rgb} {RGB()}"
@@ -350,9 +364,19 @@ class MasterMindEnv(gym.Env):
             RGB_last_action=[RGB(colour[0],colour[1],colour[2],bg=True) for colour in colours_last_action]
         else:
             RGB_last_action=[RGB()]*self.size
+        
         RGB_target=[RGB(colour[0],colour[1],colour[2],bg=True) for colour in colours_target]
-        outfile.write(f"\n Target Code : {RGB_target[0]}  {RGB_target[1]}  {RGB_target[2]}  {RGB_target[3]}  {RGB()} \n \n"+
-        f"Last action : {RGB_last_action[0]}  {RGB_last_action[1]}  {RGB_last_action[2]}  {RGB_last_action[3]}  {RGB()}")
+
+        RGB_target_string=""
+        RGB_last_action_string=""
+        for i in range(len(RGB_target)):
+            RGB_target_string+=f"{RGB_target[i]}  "
+            RGB_last_action_string+=f"{RGB_last_action[i]}  "
+        
+
+        outfile.write(f"\n Target Code :  {RGB_target_string}{RGB()} \n \n"+
+        f" Last action : {RGB_last_action_string}{RGB()}\n"+
+        f" Sum reward :{self.cumreward}")
         
         
         with closing(outfile):
