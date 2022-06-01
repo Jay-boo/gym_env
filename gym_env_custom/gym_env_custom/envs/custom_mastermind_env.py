@@ -10,30 +10,23 @@ import numpy as np
 
 class MasterMindEnv(gym.Env):
     """
-    Guess a 4-digits long password where eahc digit is between 0 and 5
-
-
-    reward: +10 if the guess is correct
+    reward system: +10 if the guess is correct
             -2 if the guess isn't correct
-    
-    max_step:10
     """
     metadata={"render_modes":["human","ansi","rgb_array"],"render_fps":4}
 
-    def __init__(self,render_mode:str="human",size:int=4,number_values:int=6,MAX_STEP:int=10):
+    def __init__(self,size:int=4,number_values:int=6,MAX_STEP:int=10):
         """
-        Constuct the env
+        Constuct the env.
 
         Parameters
         ----------
-        render_mode : str, optional="human"
-            ["human","ansi","rgb_array"]
         
         size : int=4
             size of the secret password
         
         number_values : int=6
-            possible values each digit can take. 
+            possible values each digit can take.Max=10
 
         MAX_STEP : int=10
             Number of try before ending the game.
@@ -41,16 +34,17 @@ class MasterMindEnv(gym.Env):
         -------
         None
         """
+        if number_values>10 :
+            raise Exception("Max number values exceed : Needed <=10")
         self.size=size #Number of digit to guess
-        self.values=6 #Number of possibilites for each digit
+        self.values=number_values #Number of possibilites for each digit
+        self.MAX_STEP=MAX_STEP
 
         # On creer des states de 3 pour chaque digit : 
         # 2 : The digit is correctly guess
         # 1 : Correctly guess but not well posionned
         # 0 : Nothing good 
 
-        #Remarque : Il n'y a pas d'ordre dans le Tuple . L'etat 1 ne correspnd pas 
-        #forcement à l'état du premier digit
         self.observation_space=spaces.Tuple([spaces.Discrete(3) for _ in range(self.size)])
         self.action_space=spaces.Tuple(
             [spaces.Discrete(self.values) for _ in range(self.size)]
@@ -58,21 +52,24 @@ class MasterMindEnv(gym.Env):
         
         self.window=None
         self.step_count=0
-        self.MAX_STEP=MAX_STEP
-        self.window_size=(8*25,25*MAX_STEP)
+        
+        self.window_size=(self.size*2*25,25*MAX_STEP)
         self._agent_state_to_color={
             0:(199, 0, 57),#red
-            1:(236, 238, 163),#Jaune
+            1:(236, 238, 163),#Yellow
             2:(163, 238, 163)#Green
         }
-
         self._agent_state_stock=[]
         self._action_stock=[]
         
-        
         self.MAP=["+----------------+"]
+        line=""
+        for _ in range(0,self.size):
+            line+="| "
+        line+="|"
+        line+=line
         for _ in range(10):
-            self.MAP.append("| | | | || | | | |")
+            self.MAP.append(line)
         self.MAP.append("+----------------+")
 
         self._action_to_color={
@@ -81,19 +78,30 @@ class MasterMindEnv(gym.Env):
             2:(236, 238, 163),#Jaune
             3:(163, 238, 163),#Green
             4:(163, 172, 238),#Blue
-            5:( 148, 150, 163 )#Gris
+            5:( 148, 150, 163 ),#Gris
+            6:(17,101,31),#Deep Green
+            7:(8,227,241),#Turquoise
+            8:(241,164,8),#Orange
+            9:(116,8,241)#Purple
+            
         }
         self.clock=None
+        self.cumreward=0
         
 
         
     
     def _get_obs(self):
+        """
+        Get the agent state
+        """
         return self._agent_state
     def _get_info(self):
         """
-        Need to return my target _state and the distance
-         between my agent and my target
+        Return {"target": target_state,
+        "distance": the distance between agent and the target,
+        "actions": the passed actions,
+        "agent_states": the passed action states }
         """
 
         distance=0
@@ -106,23 +114,36 @@ class MasterMindEnv(gym.Env):
         return {"target":self._target_state,
         "distance": distance,
         "actions": self._action_stock,
-        "agent_state":self._agent_state_stock
+        "agent_states":self._agent_state_stock
         }#Pas ouf comme calcul de distance pour le moment 
 
-    def reset(self,seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
+    def reset(self,seed: Optional[int] = None, return_info: bool = False):
         """
         Reset environnement
+
+        Parameters
+        ----------
+        seed : int , optional=None
+        
+        return_info : bool=False
+            return env info
+        
+        Returns
+        -------
+        observation, info : Tuple
+            observation contain the agent state. Each digit state between 0 and 3
         """
+        #---------------------------
+        #Reinitialize attributes
         super().reset(seed=seed)
-        #Rappel : Le state contient l'etat de chaque digit relativement au guess
-        # Action space est l'attribution d'une valeur à chaque digit : il y  en a self.values
         self._agent_state=(0,)*self.size #Random initial state
-        # Reintialize step count
         self._agent_state_stock=[]
         self._action_stock=[]
         self._agent_state_stock.append(self._agent_state)
         self.step_count=0
-        #Randomly initilize our target code
+        self.cumreward=0
+        
+        # Randomly initilize our target code
         self._target_state=self.action_space.sample()
         observation=self._get_obs()
         info=self._get_info()
@@ -130,14 +151,25 @@ class MasterMindEnv(gym.Env):
         return (observation,info) if return_info else observation
 
     def update_agent_state(self,action):
+        """
+        Update agent state after a new action
 
-        #   matches_digit : contiens les index dont le digit est bon a la bonne position
+        Parameters
+        ----------
+        action :  spaces.Tuple([spaces.Discrete(self.values) for _ in range(self.size)])
+            The action passed
+
+        Returns
+        -------
+        res : spaces.Tuple([spaces.Discrete(3) for _ in range(self.size)])
+            New agent state
+        """
+        #   perfect_matches_digit : contiens les index dont le digit est bon a la bonne position
         perfect_matches_digits=set(digit_action_index for digit_action_index,digit_action_value in enumerate(action) if digit_action_value==self._target_state[digit_action_index])
         n_corrects=len(perfect_matches_digits)
 
         #   target counter : Hormis les perfect matches on compte les differentes valeur de la target
         target_counter=Counter(self._target_state[i] for i in range(self.size) if i not in perfect_matches_digits)
-        
         
         #   action_counter : Counter({0:,1:,2: ,3: ,4:}) contient le nombre
         #   de digit avec la meme valeur 
@@ -148,26 +180,53 @@ class MasterMindEnv(gym.Env):
         res=([0]*(self.size -n_corrects - n_white) + [1]*n_white +[2]*n_corrects)
         return res
 
+
     def step(self, action) :
-        assert self.action_space.contains(action)
+        """
+        Submit a new action
+
+        Parameters
+        ----------
+        action :  spaces.Tuple([spaces.Discrete(self.values) for _ in range(self.size)])
+            The action passed
+
+        Returns
+        -------
+        observation,reward,cumreward,done,info : Tuple()
+        """
+        assert self.action_space.contains(action) ,"action not in action_space"
         self.step_count+=1
 
         #Modify agent state
         self._agent_state=self.update_agent_state(action)
         self._agent_state_stock.append(self._agent_state)
         self._action_stock.append(action)
-        done=self._agent_state==(2,)*4 or self.step_count>=self.MAX_STEP
+        done=self._agent_state==(2,)*self.size or self.step_count>=self.MAX_STEP
         reward=10 if (done and self._agent_state==(2,)*4 )else -2
+        self.cumreward+=reward
         observation=self._get_obs()
-        info=self._get_info
+        info=self._get_info()
 
-        return observation,reward,done,info
-
-    
+        return observation,reward,self.cumreward,done,info
 
     
 
-    def render(self,mode="human"):
+    
+
+    def render(self,mode:str ="human"):
+        """
+        Display the env
+
+        Parameters
+        ----------
+        mode : str, optional="human"
+            ["human","ansi","rgb_array"]
+
+        Returns
+        -------
+         render : pygame.window|np.Array| StringIO
+            Open a pygame window if mode="human",return a StringIO() if mode="ansi" ,return np.Array if mode="rgb_array" 
+        """
 
         if self.window is None and mode=="human":
             pygame.init()
@@ -178,8 +237,6 @@ class MasterMindEnv(gym.Env):
         
         canvas=pygame.Surface(self.window_size)
         canvas.fill((255,255,255))
-        
-         
 
         pix_square_size=25
 
@@ -304,6 +361,9 @@ class MasterMindEnv(gym.Env):
     
     
     def close(self):
+        """
+        Close window renderer if mode="human"
+        """
         if self.window is not None:
             pygame.display.quit()
             pygame.quit()
