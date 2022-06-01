@@ -5,7 +5,6 @@ from IPython import display
 
 
 
-
 env=MasterMindEnv("human")
 observation, info = env.reset(seed=42, return_info=True)
 

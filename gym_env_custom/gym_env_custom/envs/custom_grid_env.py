@@ -3,7 +3,6 @@ import pygame
 from gym import spaces
 from importlib_metadata import metadata
 import numpy as np
-import numpy as np
 from typing import Optional
 
 #https://github.com/Farama-Foundation/gym-examples/blob/main/gym_examples/envs/grid_world.py
