@@ -6,9 +6,20 @@ This repository is a package with **2 differents gym environments design for RL 
 
 &rarr; **This document helps you handle the `MasterMind-v0` env**
 
+<!-- TABLE OF CONTENTS -->
+## Table of Contents
+
+* [MasterMind environment introduction](#introduction)
+* [Clone and install the package](#clone_install)  
+* [Getting started](#getting_started)
+* [Example](#Example)
 
 
-## Fast MasterMind env introduction
+<!-- INTRODUCTION -->
+
+<div id="introduction"> </div>
+
+## MasterMind environment introduction
 
 
 In this environment your objectif is to guess a secret code in a fixed number of time. At each new guess submitted ,you can see:
@@ -22,12 +33,14 @@ In this environment your objectif is to guess a secret code in a fixed number of
   - `ansi` : Make a map at each timestep in your console
   - `rgb_array` : return the `pygame` cindow as a numpy array in your console 
 
-For each one you will see on the render's right part , the digits informing you of how far you're from the secret code , with the RED , YELLOW , GREEN digits
-On the left part you can see the actions you passed.
+For each one you will see on the render's left part , the digits informing you on how far you're from the secret code , with the RED , YELLOW , GREEN digits
+On the right part you can see the actions you passed.
 
 
+<div id="clone_install"> </div>
 
 ## Clone and install the package
+
 ```{shell}
 cd gym_env\gym_env_custom
 pip install -e .
@@ -38,19 +51,67 @@ Then a `.egg-info` file pop up.
 
 
 
-**To use :**
 
+<!-- GETTING STARTED -->
+
+<div id="getting_started"> </div>
+
+## Getting started
+
+You can look at `test_with_IPython.ipynb` and `test_renders.py` to see how to use the renders of the environment:
+
+- `test_with_IPython.ipynb` contains examples for use in jupyter notebook (**advised**)
+- `test_renders.py` show you how to use the differents renders in a classic python file
+
+**/!\ Warning**: These file are in the same directory than the `MastermindEnv`class.
+To use in any directory the initialization of the envronment will differs
+
+- env initialisation in the directory:
+
+```{Python}
+from gym_env_custom.envs.custom_mastermind_env import MasterMindEnv
+env=MasterMindEnv(size=6,number_values=10,MAX_STEP=15)
+observation, info = env.reset(return_info=True)
+
+gym.make('GridWorld-v0')
+```
+
+
+- env initialisation in any directory : (**advised**)
 ```{Python}
 import gym
 import gym_custom_env
 
-gym.make('GridWorld-v0')
+env=gym.make('MasterMind-v0',size=6,MAX_STEP=15,number_values=10)
+observation, info = env.reset(return_info=True)
 
 ```
 
-**To Do :**
+<!-- EXAMPLE -->
 
-&rarr; Make MastermindClass flexible with size of the target (fixed to 4) and the `MAX_STEP` ,`self.values`
+<div id="Example"> </div>
+
+## Example
+
+### Classic python file
+```{Python}
+import gym_env_custom
+import gym
+from time import sleep
+env=gym.make('MasterMind-v0',size=6,MAX_STEP=15,number_values=10)
+observation, info = env.reset(seed=42, return_info=True)
+print(observation,info)
+for _ in range(1000):
+    
+    action = env.action_space.sample()
+    observation, reward, done, info = env.step(action)
+    print(env.render("ansi"))
+    sleep(1)
+
+    if done:
+        observation, info = env.reset(return_info=True)
+        break
+env.close()
+```
 
 
-&rarr; Probleme test_ANSI_IPython
