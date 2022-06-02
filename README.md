@@ -6,6 +6,9 @@ This repository is a package with **2 differents gym environments design for RL 
 
 &rarr; **This document helps you handle the `MasterMind-v0` env**
 
+
+![](https://github.com/Jay-boo/gym_env/blob/master/ressources/mastermind_pic.jpg)
+
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
@@ -36,7 +39,7 @@ In this environment your objectif is to guess a secret code in a fixed number of
 For each one you will see on the render's left part , the digits informing you on how far you're from the secret code , with the RED , YELLOW , GREEN digits
 On the right part you can see the actions you passed.
 
-![](https://github.com/Jay-boo/gym_env/tree/master/ressources/mastermind_pic.jpg)
+![](https://github.com/Jay-boo/gym_env/blob/master/ressources/render_ansi_gif.gif)
 
 <div id="clone_install"> </div>
 
