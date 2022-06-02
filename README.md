@@ -1,13 +1,14 @@
-# Gym custom environments for AI game training
+# Gym custom environments for AI game training :joystick:
 This repository is a package with **2 differents gym environments design for RL :**
 
 - `GridWorld-v0` : *Basic environment already in the gym library*
 - `MasterMind-v0` : *Environment design for a MasterMind Game*
 
-&rarr; **This document helps you handle the `MasterMind-v0` env**
+:point_right: **This document helps you handle the `MasterMind-v0` env**
+
+<p align="center"><img src="https://github.com/Jay-boo/gym_env/blob/master/ressources/mastermind_pic.jpg" />
 
 
-![](https://github.com/Jay-boo/gym_env/blob/master/ressources/mastermind_pic.jpg)
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
@@ -19,6 +20,7 @@ This repository is a package with **2 differents gym environments design for RL 
 
 
 <!-- INTRODUCTION -->
+ ![](https://raw.githubusercontent.com/AlexandreBidon/Funky-Horse/main/out/line.png)
 
 <div id="introduction"> </div>
 
@@ -39,9 +41,19 @@ In this environment your objectif is to guess a secret code in a fixed number of
 For each one you will see on the render's left part , the digits informing you on how far you're from the secret code , with the RED , YELLOW , GREEN digits
 On the right part you can see the actions you passed.
 
+**Render ANSI :**
+
 ![](https://github.com/Jay-boo/gym_env/blob/master/ressources/render_ansi_gif.gif)
 
+**Render HUMAN:**
+
+
+![](https://github.com/Jay-boo/gym_env/blob/master/ressources/pic_render_human.png)
+
+
 <div id="clone_install"> </div>
+
+![](https://raw.githubusercontent.com/AlexandreBidon/Funky-Horse/main/out/line.png)
 
 ## Clone and install the package
 
@@ -51,23 +63,24 @@ pip install -e .
 ```
 Then a `.egg-info` file pop up.
 
-*Remark : You can use `pip list` and check if `gym-custom-env` appears*
+* :rotating_light: *Remark : You can use `pip list` and check if `gym-custom-env` appears*
 
 
 
 
 <!-- GETTING STARTED -->
 
+![](https://raw.githubusercontent.com/AlexandreBidon/Funky-Horse/main/out/line.png)
 <div id="getting_started"> </div>
 
-## Getting started
+## :rocket: Getting started
 
 You can look at `test_with_IPython.ipynb` and `test_renders.py` to see how to use the renders of the environment:
 
 - `test_with_IPython.ipynb` contains examples for use in jupyter notebook (**advised**)
 - `test_renders.py` show you how to use the differents renders in a classic python file
 
-**/!\ Warning**: These file are in the same directory than the `MastermindEnv`class.
+ :rotating_light: **Warning**: These file are in the same directory than the `MastermindEnv`class.
 To use in any directory the initialization of the envronment will differs
 
 - env initialisation in the directory:
@@ -93,9 +106,10 @@ observation, info = env.reset(return_info=True)
 
 <!-- EXAMPLE -->
 
+![](https://raw.githubusercontent.com/AlexandreBidon/Funky-Horse/main/out/line.png)
 <div id="Example"> </div>
 
-## Example
+##  :technologist: Example
 
 ### Classic python file
 ```{Python}
