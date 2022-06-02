@@ -12,13 +12,16 @@ from IPython import display
 
 #------------------------
 # Render mode ="human"
-env=MasterMindEnv(size=6,number_values=5,MAX_STEP=3)
+env=MasterMindEnv(size=6,number_values=5,MAX_STEP=20)
 env.reset()
-for _ in range(10):
+for _ in range(20):
     action = env.action_space.sample()
     observation, reward, done, info = env.step(action)
     env.render("human")
+    
     sleep(0.5)
+    if done:
+        break
 
 #-----------------------
 # Render mode ="ANSI"
