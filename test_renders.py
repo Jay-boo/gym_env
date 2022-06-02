@@ -16,7 +16,7 @@ env=MasterMindEnv(size=6,number_values=5,MAX_STEP=3)
 env.reset()
 for _ in range(10):
     action = env.action_space.sample()
-    observation, reward,cumreward, done, info = env.step(action)
+    observation, reward, done, info = env.step(action)
     env.render("human")
     sleep(0.5)
 
@@ -27,7 +27,7 @@ env=MasterMindEnv(size=6,number_values=5,MAX_STEP=3)
 env.reset()
 for _ in range(10):
     action = env.action_space.sample()
-    observation, reward,cumreward, done, info = env.step(action)
+    observation, reward, done, info = env.step(action)
     print(env.render("ansi"))
     sleep(0.5)
     if done:
